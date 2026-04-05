@@ -7,7 +7,10 @@ raw_data = {
     'cell_type': ['Cancer', 'Immune', 'Cancer', 'Immune', 'Stroma'],
     'area_microns': [120, 85, 135, 90, 210],
     'is_nearby_tumor': [True, True, False, True, False],
-    'protein_level': [0.8, 0.2, 0.9, 0.1, 0.5]  # New: 0.0 to 1.0 scale
+    'protein_level': [0.8, 0.2, 0.9, 0.1, 0.5],  # New: 0.0 to 1.0 scale
+    'cell_type': ['Cancer', 'Immune', 'Cancer', 'Immune', 'Stroma'],
+    'x_coord': [10, 12, 50, 52, 30], # Where is it left-to-right?
+    'y_coord': [10, 11, 50, 51, 30]  # Where is it up-and-down?
 }
 
 # 2. We turn that raw data into a "DataFrame" (The Pandas Spreadsheet)
@@ -111,4 +114,37 @@ high_count = df['is_high_expression'].value_counts()
 print("\n--- COUNT OF HIGH VS LOW EXPRESSION ---")
 print(high_count)
 
+# --- MARCH 24: SPATIAL COORDINATES ---
+# 1. Find the "Center" of your cell population
+print("\n--- CENTER OF THE BIOPSY ---")
+print(df[['x_coord', 'y_coord']].mean())
 
+# --- MARCH 25: MIGRATION SIMULATION ---
+
+# Current coordinates
+cancer_x, cancer_y = 10, 10
+immune_x, immune_y = 500, 500
+
+# Simulation: Move the immune cell 100 units closer
+new_immune_x = immune_x - 100
+new_immune_y = immune_y - 100
+
+print(f"Immune cell moved to: ({new_immune_x}, {new_immune_y})")
+
+# Update your DataFrame for the 'Immune' row
+df.loc[df['cell_type'] == 'Immune', ['x_coord', 'y_coord']] = [new_immune_x, new_immune_y]
+
+# --- MARCH 26: DATA VISUALIZATION ---
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# We create a 'scatter plot' 
+# hue: colors the dots based on protein level
+# size: makes larger cells appear bigger on the map
+plt.figure(figsize=(8,6))
+sns.scatterplot(data=df, x='x_coord', y='y_coord', hue='protein_level', size='area_microns')
+
+plt.title("Spatial Map of Tumor Biopsy")
+plt.xlabel("X Coordinate (microns)")
+plt.ylabel("Y Coordinate (microns)")
+plt.show()
